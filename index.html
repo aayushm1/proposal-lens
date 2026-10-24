@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposal Lens · AI hotel proposal analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1F3A; --ink:#0F172A; --muted:#64748B; --line:#E2E8F0; --bg:#F5F7FB; --card:#fff;
+  --blue:#0A6CFF; --blue-50:#EEF4FF; --teal:#00A99D; --green:#12A150; --green-50:#E8F7EE;
+  --amber:#D97706; --amber-50:#FEF6E7; --red:#DC2626; --red-50:#FDECEC; --violet:#7C3AED;
+  --radius:14px; --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:14px;line-height:1.45}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+
+/* top bar */
+.topbar{background:var(--navy);color:#fff}
+.topbar .wrap{display:flex;align-items:center;gap:14px;height:58px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#3B8BFF,#00C2B2);display:grid;place-items:center;font-size:14px}
+.logo small{font-weight:500;color:#9FB3D1;font-size:13px;margin-left:2px}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.12);color:#CFE0FF;letter-spacing:.02em}
+.topbar .sp{flex:1}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:9px;padding:7px 12px;font-weight:600;font-size:13px}
+.ghost:hover{background:rgba(255,255,255,.08)}
+
+/* event bar */
+.eventbar{background:#fff;border-bottom:1px solid var(--line)}
+.eventbar .wrap{display:flex;gap:28px;align-items:center;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.ev-title{font-weight:700;font-size:16px}
+.ev-sub{color:var(--muted);font-size:12.5px}
+.ev-stat{display:flex;flex-direction:column}
+.ev-stat b{font-size:14px}
+.ev-stat span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+
+/* stepper */
+.stepper{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:600;font-size:13px}
+.step .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#EEF2F7;font-size:12px}
+.step.active{border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 3px var(--blue-50)}
+.step.active .n{background:var(--blue);color:#fff}
+.step.done{color:var(--ink)}
+.step.done .n{background:var(--green);color:#fff}
+.step:disabled{opacity:.5;cursor:not-allowed}
+
+section.view{display:none;animation:fade .35s ease}
+section.view.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #EDF1F6;padding:20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+@media (max-width:1000px){.g2,.g3,.g5{grid-template-columns:1fr}}
+h2{font-size:22px;letter-spacing:-.02em;margin:0 0 4px}
+h3{font-size:15px;margin:0 0 10px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:14px}
+.row{display:flex;align-items:center;gap:12px}
+.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(10,108,255,.28)}
+.btn:hover{filter:brightness(1.06)}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF2F7;color:#334155}
+.tag.red{background:var(--red-50);color:var(--red)}.tag.amber{background:var(--amber-50);color:var(--amber)}.tag.green{background:var(--green-50);color:var(--green)}.tag.blue{background:var(--blue-50);color:var(--blue)}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+
+/* inbox */
+.inbox-item{display:flex;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:10px}
+.ficon{width:42px;height:50px;border-radius:7px;display:grid;place-items:center;font-size:10.5px;font-weight:800;color:#fff;flex:none;position:relative}
+.ficon:after{content:"";position:absolute;right:0;top:0;border-width:0 10px 10px 0;border-style:solid;border-color:transparent var(--bg) rgba(255,255,255,.35) transparent}
+.inbox-item .meta{flex:1;min-width:0}
+.inbox-item .fname{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inbox-item .claim{text-align:right}
+.inbox-item .claim b{font-size:18px}
+.callout{border-radius:12px;padding:14px 16px;background:var(--blue-50);border:1px solid #D6E4FF;color:#173A7A}
+.callout.red{background:var(--red-50);border-color:#F7CFCF;color:#7F1D1D}
+.callout.green{background:var(--green-50);border-color:#C5EBD3;color:#14532D}
+
+/* analysis modal */
+.modal-bg{position:fixed;inset:0;background:rgba(11,31,58,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#0D1B30;color:#DCE7F7;border-radius:16px;width:min(720px,100%);padding:22px 24px;box-shadow:0 30px 80px rgba(0,0,0,.4);border:1px solid #1E3354}
+.modal h3{color:#fff;font-size:16px}
+.log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;height:300px;overflow:auto;background:#081325;border-radius:10px;padding:14px;border:1px solid #1A2C4A}
+.log div{padding:2px 0;animation:fade .25s ease}
+.log .warn{color:#FBBF24}.log .ok{color:#34D399}.log .info{color:#93C5FD}.log .dim{color:#64748B}
+.bar{height:6px;background:#1A2C4A;border-radius:6px;overflow:hidden;margin-top:14px}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3B8BFF,#00C2B2);transition:width .3s}
+
+/* KPI */
+.kpi{padding:16px 18px}
+.kpi .v{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.kpi .l{font-size:12px;color:var(--muted);font-weight:500}
+
+/* rank flip */
+.rankcols{display:grid;grid-template-columns:1fr 70px 1fr;align-items:start}
+.rankcol .ri{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff;height:46px}
+.rankcol .ri .num{font-weight:800;color:var(--muted);width:18px}
+.rankcol .ri .nm{flex:1;font-weight:600}
+.rankcol .ri .val{font-weight:700;font-variant-numeric:tabular-nums}
+.ri.hl-bad{border-color:#F3B4B4;background:#FFF8F8}
+.ri.hl-good{border-color:#A7DDBB;background:#F6FCF8}
+svg.links{width:70px;height:100%}
+
+/* stacked bars */
+.sb-row{display:grid;grid-template-columns:190px 1fr 110px;gap:12px;align-items:center;margin-bottom:10px}
+.sb-name{font-weight:600;display:flex;align-items:center;gap:8px}
+.sb-track{height:26px;display:flex;border-radius:6px;overflow:hidden;background:#F1F5F9;position:relative}
+.sb-track>i{display:block;height:100%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.sb-total{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.sb-total small{display:block;font-weight:500;color:var(--green);font-size:11px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.legend span{display:flex;align-items:center;gap:6px}
+
+/* table */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;background:#FAFBFD;position:sticky;top:0}
+.tbl td.num{font-variant-numeric:tabular-nums}
+.tbl td.good{background:#F3FBF6;color:#166534;font-weight:600}
+.tbl td.bad{background:#FDF3F3;color:#991B1B;font-weight:600}
+.tbl td.warn{background:#FFF9EE;color:#92400E;font-weight:600}
+.tbl .bench{color:var(--muted);font-size:12px}
+.scroll-x{overflow-x:auto}
+
+/* risk */
+.risk-layout{display:grid;grid-template-columns:300px 1fr;gap:16px}
+@media (max-width:1000px){.risk-layout{grid-template-columns:1fr}}
+.rlist button{width:100%;text-align:left;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;margin-bottom:8px}
+.rlist button.on{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-50)}
+.gauge{width:52px;height:52px;flex:none}
+.flag{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff}
+.flag .ft{display:flex;align-items:center;gap:8px;font-weight:700}
+.flag .ex{margin-top:10px;font-family:Georgia,serif;font-size:13px;background:#FAFAF7;border-left:3px solid #CBD5E1;padding:10px 12px;color:#334155;border-radius:0 8px 8px 0}
+.flag .ex mark{background:#FFE58A;padding:0 2px;border-radius:2px}
+.flag .rl{margin-top:8px;font-size:13px;color:#14532D;background:var(--green-50);padding:8px 12px;border-radius:8px}
+.flag .bm{display:flex;gap:16px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.flag .bm b{color:var(--ink)}
+.sev-high{border-left:4px solid var(--red)}.sev-med{border-left:4px solid var(--amber)}.sev-low{border-left:4px solid #94A3B8}.sev-good{border-left:4px solid var(--green)}
+
+/* stress */
+input[type=range]{width:100%;accent-color:var(--blue)}
+.slider-big{font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--blue)}
+.chart-wrap{position:relative}
+.exp-row{display:grid;grid-template-columns:170px 1fr 100px;gap:10px;align-items:center;margin-bottom:9px}
+.exp-track{height:18px;background:#F1F5F9;border-radius:5px;overflow:hidden;display:flex}
+.exp-track i{display:block;height:100%;transition:width .25s}
+
+/* recommend */
+.weights label{display:block;margin-bottom:14px}
+.weights .wl{display:flex;justify-content:space-between;font-weight:600;margin-bottom:4px}
+.score-row{display:grid;grid-template-columns:28px 180px 1fr 54px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);transition:background .3s}
+.score-row .stack{display:flex;height:14px;border-radius:4px;overflow:hidden;background:#F1F5F9}
+.score-row .stack i{display:block;height:100%;transition:width .5s}
+.winner{background:linear-gradient(135deg,#0B1F3A,#153563);color:#fff;border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden}
+.winner:after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,194,178,.35),transparent 70%)}
+.winner .big{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.winner .why{color:#BFD3F2;margin-top:6px}
+.ask{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.ask input{margin-top:3px;accent-color:var(--blue);width:16px;height:16px}
+.ask .t{font-weight:600}
+.ask .v{margin-left:auto;font-weight:700;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums}
+.email{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;white-space:pre-wrap;background:#0D1B30;color:#DCE7F7;border-radius:12px;padding:16px;min-height:260px;max-height:440px;overflow:auto}
+.caret{display:inline-block;width:7px;height:14px;background:#00C2B2;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+select{font-family:inherit;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#fff}
+
+/* drawer */
+.drawer-bg{position:fixed;inset:0;background:rgba(11,31,58,.4);display:none;z-index:60}
+.drawer-bg.show{display:block}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:#fff;z-index:61;transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);overflow:auto;padding:28px}
+.drawer.show{transform:none}
+.drawer h4{margin:22px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue)}
+.drawer p,.drawer li{color:#334155}
+.drawer ul{padding-left:18px;margin:6px 0}
+.metric{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:34px 0 40px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;transition:.3s;z-index:80}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div class="logo"><div class="logo-mark">◆</div>Proposal Lens <small>AI hotel proposal analyst</small></div>
+  <span class="pill">CONCEPT PROTOTYPE</span>
+  <div class="sp"></div>
+  <button class="ghost" id="whyBtn">Why this exists</button>
+  <button class="ghost" id="resetBtn">↺ Restart demo</button>
+</div></div>
+
+<div class="eventbar"><div class="wrap">
+  <div>
+    <div class="ev-title">Northwind Q2 Sales Kickoff 2027</div>
+    <div class="ev-sub">RFP #NW-SKO-27 · Chicago, IL · Planner: Priya Shah, Sr. Event Manager</div>
+  </div>
+  <div class="ev-stat"><b>May 12–14, 2027</b><span>Program dates</span></div>
+  <div class="ev-stat"><b>450</b><span>Attendees</span></div>
+  <div class="ev-stat"><b>990</b><span>Room nights · peak 380</span></div>
+  <div class="ev-stat"><b>$600K</b><span>Venue budget</span></div>
+  <div class="ev-stat"><b style="color:var(--red)">Nov 6</b><span>Decision due</span></div>
+</div></div>
+
+<div class="wrap">
+  <div class="stepper" id="stepper"></div>
+
+  <!-- STEP 1 INBOX -->
+  <section class="view show" id="v0">
+    <div class="row between" style="align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:16px">
+      <div>
+        <h2>5 proposals in, 5 different formats</h2>
+        <p class="lead" style="margin:0">Every hotel quotes differently. Today this becomes a 3-day spreadsheet exercise, and hidden costs still slip through.</p>
+      </div>
+      <button class="btn" id="analyzeBtn">✦ Normalize &amp; analyze with Proposal Lens</button>
+    </div>
+    <div class="grid" style="grid-template-columns:1.6fr 1fr">
+      <div id="inbox"></div>
+      <div>
+        <div class="card">
+          <h3>What the planner sees today</h3>
+          <p class="muted" style="margin-top:0">Sorted by quoted room rate, the way most teams shortlist:</p>
+          <div id="naiveRank"></div>
+          <div class="callout" style="margin-top:14px">
+            <b>The trap:</b> the quoted rate is only about half of what the hotel actually costs. Fees, F&amp;B minimums, AV exclusivity and penalty clauses decide the real price.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 COMPARE -->
+  <section class="view" id="v1">
+    <h2>True cost of ownership, side by side</h2>
+    <p class="lead">Every proposal is normalized to the same basis: 990 room nights, Chicago taxes, your $135K F&amp;B projection and $48K AV plan, with concessions netted out.</p>
+    <div class="grid g3" style="margin-bottom:16px" id="kpis"></div>
+    <div class="grid" style="grid-template-columns:1fr 1.25fr;margin-bottom:16px">
+      <div class="card">
+        <h3>The ranking flips</h3>
+        <div class="rankcols" id="rankflip"></div>
+      </div>
+      <div class="card">
+        <div class="row between"><h3 style="margin:0">Where the money actually goes</h3><span class="tag">at 100% attendance</span></div>
+        <div style="margin-top:14px" id="stacked"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row between" style="margin-bottom:10px"><h3 style="margin:0">Normalized terms vs. market benchmark</h3><span class="tag blue">Benchmark: Chicago · May · 300–500 peak rooms (illustrative)</span></div>
+      <div class="scroll-x"><table class="tbl" id="termsTbl"></table></div>
+    </div>
+  </section>
+
+  <!-- STEP 3 RISK -->
+  <section class="view" id="v2">
+    <h2>Contract risk, clause by clause</h2>
+    <p class="lead">Proposal Lens reads every clause and compares it with what thousands of similar Chicago contracts accepted, then drafts the redline.</p>
+    <div class="risk-layout">
+      <div class="rlist" id="rlist"></div>
+      <div id="rdetail"></div>
+    </div>
+  </section>
+
+  <!-- STEP 4 STRESS -->
+  <section class="view" id="v3">
+    <h2>Stress test: what if attendance drops?</h2>
+    <p class="lead">Sales kickoffs are often cut late (hiring freezes, reorgs, travel bans). See what each contract costs you when fewer people show up.</p>
+    <div class="grid" style="grid-template-columns:320px 1fr;margin-bottom:16px">
+      <div class="card">
+        <div class="muted" style="font-weight:600">Attendance drop vs. plan</div>
+        <div class="slider-big" id="dropVal">0%</div>
+        <input type="range" min="0" max="40" value="0" id="drop">
+        <div class="row between muted" style="font-size:12px"><span>450 people</span><span>270 people</span></div>
+        <div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn sec" data-preset="10" style="padding:6px 10px;font-size:12px">Mild −10%</button>
+          <button class="btn sec" data-preset="20" style="padding:6px 10px;font-size:12px">Hiring freeze −20%</button>
+          <button class="btn sec" data-preset="35" style="padding:6px 10px;font-size:12px">Travel ban −35%</button>
+        </div>
+        <div class="callout red" style="margin-top:16px" id="stressCallout"></div>
+      </div>
+      <div class="card">
+        <div class="row between"><h3 style="margin:0">Money paid for nothing: room penalties + unused F&amp;B minimum</h3></div>
+        <div class="chart-wrap" id="lineChart" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Exposure at <span id="dropVal2">0%</span> drop</h3>
+        <div id="expBars"></div>
+        <div class="legend"><span><i class="dot" style="background:#DC2626"></i>Room attrition penalty</span><span><i class="dot" style="background:#F59E0B"></i>Unused F&amp;B minimum</span></div>
+      </div>
+      <div class="card">
+        <div class="row between"><h3 style="margin:0">If you cancel the whole event…</h3><select id="cancelSel"><option value="400">400 days out</option><option value="200" selected>Today (~200 days out)</option><option value="120">120 days out</option><option value="60">60 days out</option></select></div>
+        <table class="tbl" style="margin-top:10px" id="cancelTbl"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 5 RECOMMEND -->
+  <section class="view" id="v4">
+    <h2>Recommendation &amp; negotiation playbook</h2>
+    <p class="lead">Set what matters for this event. Proposal Lens ranks the hotels, explains why, and drafts the counter-proposal.</p>
+    <div class="grid" style="grid-template-columns:300px 1fr;margin-bottom:16px">
+      <div class="card weights" id="weights"></div>
+      <div class="card">
+        <div id="winner"></div>
+        <div style="margin-top:14px" id="scores"></div>
+        <div class="legend"><span><i class="dot" style="background:#0A6CFF"></i>Cost</span><span><i class="dot" style="background:#00A99D"></i>Contract safety</span><span><i class="dot" style="background:#7C3AED"></i>Attendee experience</span><span><i class="dot" style="background:#F59E0B"></i>Program fit</span></div>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="row between"><h3 style="margin:0">Negotiation asks</h3><select id="negHotel"></select></div>
+        <div id="asks"></div>
+        <div class="row between" style="margin-top:14px">
+          <div><div class="muted" style="font-size:12px">Value of selected asks</div><div style="font-size:22px;font-weight:800;color:var(--green)" id="askTotal"></div></div>
+          <button class="btn" id="draftBtn">✦ Draft counter-proposal</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px"><h3 style="margin:0">Counter-proposal email</h3><button class="btn sec" id="copyBtn" style="padding:6px 12px;font-size:12px">Copy</button></div>
+        <div class="email" id="email"><span class="muted">Pick your asks, then click “Draft counter-proposal”.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Concept prototype for Cvent by Aayush Mehan · Not affiliated with or endorsed by Cvent · Hotels, people, contracts and benchmarks are fictional.</footer>
+</div>
+
+<!-- analysis modal -->
+<div class="modal-bg" id="modal"><div class="modal">
+  <div class="row between"><h3 style="margin:0">✦ Proposal Lens is reading 5 proposals</h3><span class="pill" id="modalCount">0 / 5</span></div>
+  <p style="color:#8CA3C7;margin:6px 0 12px;font-size:13px">Extracting terms · normalizing to one cost basis · checking clauses against benchmark</p>
+  <div class="log" id="log"></div>
+  <div class="bar"><i id="prog"></i></div>
+</div></div>
+
+<!-- drawer -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <div class="row between"><h2 style="margin:0">Why Proposal Lens</h2><button class="btn sec" id="closeDrawer" style="padding:6px 12px">✕</button></div>
+  <p class="muted">A one-page PM brief behind this prototype.</p>
+  <h4>The problem</h4>
+  <p>Cvent already makes it fast for hotels to <i>respond</i> to RFPs. On the planner side, comparing the responses is still manual. A typical program gets 5–20 proposals in different formats, and the quoted room rate is only ~40–50% of the real cost. Planners lose days in spreadsheets, and penalty clauses get signed without anyone noticing.</p>
+  <h4>Who it's for</h4>
+  <ul><li><b>Primary:</b> corporate and agency planners sourcing 200+ room-night programs</li><li><b>Secondary:</b> procurement and finance approvers who need a defensible pick</li><li><b>Indirect:</b> hotels. Transparent comparisons reward good-faith proposals.</li></ul>
+  <h4>Why Cvent wins this</h4>
+  <ul><li>Proposals already arrive through the Cvent Supplier Network, so the structured data is there</li><li>25+ years of contract outcomes make for benchmarks no generic LLM has</li><li>Connects sourcing → Passkey room blocks → budget tracking into one loop</li><li>A clean fit for Cvent's AI-agent and headless-platform strategy</li></ul>
+  <h4>Success metrics</h4>
+  <div class="metric"><span>Time from last proposal received → hotel selected</span><b>3 days → &lt;1 hr</b></div>
+  <div class="metric"><span>Hidden cost surfaced per RFP</span><b>North star</b></div>
+  <div class="metric"><span>% contracts signed with at-market attrition terms</span><b>+25 pts</b></div>
+  <div class="metric"><span>Attrition penalties paid ($, measured via Passkey)</span><b>↓ 30%</b></div>
+  <div class="metric"><span>Planner NPS on sourcing workflow</span><b>Guardrail</b></div>
+  <h4>Phased rollout</h4>
+  <ul><li><b>V1:</b> Supplier Network responses only (structured data, no OCR risk). TCO view + rank flip.</li><li><b>V2:</b> PDF/Word/email ingestion, clause risk scoring, redlines.</li><li><b>V3:</b> Negotiation agent paired with the hotel-side Response Assistant, so both sides negotiate in Cvent.</li></ul>
+  <h4>Risks &amp; mitigations</h4>
+  <ul><li><b>Hotel pushback on scoring:</b> score terms, not brands. Give hotels a "proposal health" preview before they submit.</li><li><b>Extraction accuracy:</b> confidence scores, source-page citations, and the planner confirms flagged terms.</li><li><b>Legal advice concerns:</b> frame output as benchmark guidance, with redlines as suggestions.</li></ul>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== DATA (all fictional) ===================== */
+const EVENT={attendees:450,days:3,block:[140,380,380,90],roomTax:0.174,fnbTax:0.115,fnbNeed:135000,avBase:48000};
+const RN=EVENT.block.reduce((a,b)=>a+b,0);
+const NIGHT_W=[1.6,0.85,0.85,1.4]; // shoulder nights lose people faster than peak nights
+const BENCH={attr:0.20,comp:40,svc:0.24,fee:0,fnbOver:0.05};
+
+const HOTELS=[
+ {id:'lake',name:'Lakeshore Grand Hotel',short:'Lakeshore Grand',area:'Streeterville',color:'#2563EB',
+  file:'Lakeshore_Grand_NW_SKO_2027.pdf',fmt:'PDF',fcolor:'#DC2626',pages:'9 pages',received:'Oct 18',contact:'Daniel Ortiz',
+  rate:289,fee:0,compRatio:40,rebate:10,fnbMin:140000,svc:0.24,meetingRental:0,meetingWaiver:0,avMult:1,avFee:0,avExclusive:false,wifi:0,transport:0,
+  attr:0.20,attrBasis:'cumulative',penaltyPct:0.8,resell:true,rating:4.6,exp:90,
+  cancel:[[365,.10],[181,.35],[91,.60],[0,.85]],
+  log:['Reading Lakeshore_Grand_NW_SKO_2027.pdf · 9 pages','Extracted 36 terms · rate $289 · comp 1/40 · $10/room-night rebate','Attrition 20% cumulative, lost-profit basis (80%) · resale credit ✓','F&B minimum $140,000 · 24% service charge · outside AV permitted'],
+  flags:[
+   {sev:'low',type:'contract',t:'F&B minimum sits 4% above your projection',d:'$140K minimum vs. your $135K plan. You pay for ~$5K of food you don\'t order.',ex:'Group agrees to a minimum food and beverage expenditure of <mark>$140,000</mark>, exclusive of service charge and tax.',bm:['Yours: +4% over plan','Market: ≤ plan'],rl:'Reduce the minimum to $130,000, or allow AV and room rental to count toward it.'},
+   {sev:'low',type:'contract',t:'Rate held for 14 days only',d:'The offer expires Nov 1, before your Nov 6 decision date.',ex:'This proposal and the rates herein are <mark>valid for fourteen (14) days</mark> from the date of issue.',bm:['Yours: 14 days','Market: 30 days'],rl:'Ask for a 30-day hold so Finance has time to approve.'},
+   {sev:'good',type:'contract',t:'Attrition terms at market, with resale credit',d:'20% cumulative allowance, damages at 80% (lost profit), credit for rooms resold.',bm:['Yours: 20% cum.','Market: 20% cum.']},
+  ],
+  asks:[
+   {t:'Lower F&B minimum to $130K',why:'Sits below your $135K projection, so you never pay for food you don\'t serve.',ch:{fnbMin:130000},at:0},
+   {t:'Add a 120-day block review (cut up to 10% penalty-free)',why:'Protects you if headcount is cut after Q1 planning.',ch:{attr:0.30},at:0.30,lbl:'protected in a 30% drop'},
+   {t:'Comp ratio 1 per 35',why:'Top-quartile benchmark for 900+ room-night programs.',ch:{compRatio:35},at:0},
+   {t:'Extend rate hold to Dec 1',why:'Lines up with your Finance approval cycle.',val:0,vtxt:'Time'},
+  ]},
+ {id:'mer',name:'Meridian River North',short:'Meridian River North',area:'River North',color:'#9333EA',
+  file:'Meridian RN - Northwind proposal FINAL v3.pdf',fmt:'PDF',fcolor:'#DC2626',pages:'14 pages',received:'Oct 16',contact:'Alyssa Brandt',
+  rate:249,fee:35,compRatio:50,rebate:0,fnbMin:185000,svc:0.26,meetingRental:36000,meetingWaiver:250000,avMult:1.35,avFee:0,avExclusive:true,wifi:12,transport:0,
+  attr:0.10,attrBasis:'night',penaltyPct:1.0,resell:false,rating:4.2,exp:78,
+  cancel:[[365,.50],[181,.75],[0,1.0]],
+  log:['Reading Meridian RN - Northwind proposal FINAL v3.pdf · 14 pages','Extracted 41 terms · headline rate $249','⚠ $35/night "Urban Destination Fee" found on p.11, not in quoted rate','⚠ Attrition: 90% pickup required on EACH night (§7.2), damages at 100%','⚠ Meeting room rental $12K/day waived only if F&B ≥ $250K','⚠ In-house AV exclusive · outside vendors prohibited (§12.4)'],
+  flags:[
+   {sev:'high',type:'contract',t:'Attrition: 10% allowance, measured night-by-night',d:'Every shoulder night is a separate penalty trigger. A 20% headcount dip costs ~$25K here and ~$0 at Lakeshore.',ex:'Group agrees to utilize no less than <mark>ninety percent (90%) of the contracted room block on each individual night</mark>. Hotel shall be entitled to <mark>100% of the group rate</mark> for each unused room night.',bm:['Yours: 10% night-by-night','Market: 20% cumulative'],rl:'Change to 80% cumulative pickup, with damages at 80% of rate and credit for rooms resold.'},
+   {sev:'high',type:'contract',t:'F&B minimum is 37% above your projected spend',d:'$185K minimum vs. $135K plan means $70K (with service charge and tax) spent on food nobody ordered.',ex:'Group shall guarantee a <mark>minimum food & beverage revenue of $185,000</mark>, exclusive of 26% taxable service charge.',bm:['Yours: +37% over plan','Market: ≤ +5%'],rl:'Set the minimum at $135,000, matched to the agreed BEO projection.'},
+   {sev:'high',type:'contract',t:'Meeting rooms cost $36K unless F&B reaches $250K',d:'The waiver threshold is unreachable, so this is a fixed $36K charge.',ex:'Meeting room rental of <mark>$12,000 per day</mark> will be waived provided Group achieves <mark>$250,000</mark> in food & beverage revenue.',bm:['Yours: $36K','Market: waived at F&B min'],rl:'Waive meeting room rental once the F&B minimum is met.'},
+   {sev:'med',type:'contract',t:'$35/night destination fee hidden on page 11',d:'Adds $40.7K including tax. The "lowest rate" is not actually the lowest.',ex:'All guest rooms are subject to a <mark>$35.00 per room, per night Urban Destination Fee</mark>, plus applicable tax.',bm:['Yours: $35/night','Market: $0 for groups'],rl:'Waive the destination fee for group-block rooms.'},
+   {sev:'med',type:'contract',t:'Exclusive in-house AV at a ~35% premium',d:'You can\'t bring your preferred AV partner. Expect +$16.8K versus market.',ex:'Hotel\'s <mark>in-house audio-visual provider shall be the exclusive provider</mark> for all functions held in Hotel meeting space.',bm:['Yours: exclusive','Market: outside allowed + patch fee'],rl:'Allow outside AV with a capped $5,000 patch fee.'},
+   {sev:'med',type:'contract',t:'Cancellation: 50% liability even a year out',d:'The harshest schedule of the five proposals.',ex:'Cancellation more than 365 days prior to arrival: <mark>50% of anticipated revenue</mark>.',bm:['Yours: 50% at 365+ days','Market: 10–25%'],rl:'Use a graduated scale: 10% beyond 365 days and 35% at 181–365 days.'},
+   {sev:'low',type:'contract',t:'Wi-Fi billed at $12 per person, per day',d:'$16.2K across the program.',bm:['Yours: $12/pp/day','Market: included']},
+   {sev:'low',type:'contract',t:'26% service charge',d:'2 points above market.',bm:['Yours: 26%','Market: 24%']},
+  ],
+  asks:[
+   {t:'Remove the $35 destination fee',why:'Market norm for group blocks is $0.',ch:{fee:0},at:0},
+   {t:'Match F&B minimum to $135K projection',why:'Eliminates $70K of forced spend.',ch:{fnbMin:135000},at:0},
+   {t:'Waive meeting room rental',why:'Standard once the F&B minimum is met.',ch:{meetingRental:0},at:0},
+   {t:'20% cumulative attrition at 80% with resale credit',why:'Brings the contract to market terms.',ch:{attr:0.2,attrBasis:'cumulative',penaltyPct:0.8,resell:true},at:0.2,lbl:'protected in a 20% drop'},
+   {t:'Allow outside AV (≤ $5K patch fee)',why:'Keeps your preferred AV partner.',ch:{avMult:1,avFee:5000},at:0},
+  ]},
+ {id:'wab',name:'Hotel Wabash & Co.',short:'Hotel Wabash',area:'The Loop',color:'#0891B2',
+  file:'Group quote: Northwind SKO (email reply)',fmt:'EML',fcolor:'#475569',pages:'email body',received:'Oct 19',contact:'Marcus Hill',
+  rate:305,fee:0,compRatio:40,rebate:0,fnbMin:120000,svc:0.23,meetingRental:0,meetingWaiver:0,avMult:1,avFee:4500,avExclusive:false,wifi:0,transport:0,
+  attr:0.20,attrBasis:'cumulative',penaltyPct:0.8,resell:true,rating:4.7,exp:85,
+  cancel:[[365,.20],[181,.40],[91,.70],[0,.90]],
+  log:['Parsing email reply from Hotel Wabash & Co. · unstructured text','Extracted 24 terms · rate $305 · F&B min $120K','⚠ Offers only 320 rooms on peak nights (you need 380)','⚠ Grand Ballroom capacity 410 theater-style (you need 450)'],
+  flags:[
+   {sev:'high',type:'fit',t:'Only 320 rooms on peak nights. You need 380.',d:'60 rooms/night would go to an overflow hotel, splitting your sales team across properties.',ex:'We are pleased to offer <mark>up to 320 rooms on the peak nights</mark> of May 12–13.',bm:['Offered: 320','Required: 380'],rl:'Secure a 60-room overflow at the sister property, same rate, with a shuttle included.'},
+   {sev:'high',type:'fit',t:'General session room seats 410. You need 450.',d:'The keynote room is too small for the full sales org.',ex:'The Grand Ballroom accommodates <mark>410 guests theater-style</mark>.',bm:['Capacity: 410','Required: 450'],rl:'Confirm an alternate general-session space or an overflow viewing room.'},
+   {sev:'low',type:'contract',t:'$4,500 outside AV patch fee',d:'Small, but negotiable.',bm:['Yours: $4.5K','Market: $0–5K']},
+   {sev:'good',type:'contract',t:'Best guest rating in the set (4.7)',d:'Boutique property, strong attendee experience.'},
+  ],
+  asks:[
+   {t:'60-room overflow at sister property, same rate',why:'Closes the room gap without splitting the rate.',val:0,vtxt:'Fit'},
+   {t:'Confirm alternate general-session space',why:'Makes the keynote viable.',val:0,vtxt:'Fit'},
+   {t:'Waive outside AV patch fee',why:'',ch:{avFee:0},at:0},
+  ]},
+ {id:'navy',name:'Navy Pier Conference Resort',short:'Navy Pier Resort',area:'Navy Pier',color:'#EA580C',
+  file:'NPCR_Proposal_Northwind.docx',fmt:'DOCX',fcolor:'#2563EB',pages:'11 pages',received:'Oct 20',contact:'Hannah Cole',
+  rate:269,fee:25,compRatio:40,rebate:0,fnbMin:160000,svc:0.25,meetingRental:0,meetingWaiver:0,avMult:1.2,avFee:0,avExclusive:true,wifi:0,transport:0,
+  attr:0.15,attrBasis:'cumulative',penaltyPct:1.0,resell:false,rating:4.4,exp:80,
+  cancel:[[365,.25],[181,.50],[91,.80],[0,1.0]],
+  log:['Reading NPCR_Proposal_Northwind.docx · 11 pages','Extracted 38 terms · rate $269 + $25 resort fee','⚠ Rate escalation: +8% if not signed by Nov 15, 2026 (§3.1)','⚠ No renovation clause; public filings show ballroom renovation spring 2027','Attrition 15% cumulative at 100% of rate · no resale credit'],
+  flags:[
+   {sev:'high',type:'contract',t:'Rates jump 8% if not signed by Nov 15',d:'A pressure clause worth ~$25K. Your internal approval cycle runs past this date.',ex:'Should this agreement not be fully executed by <mark>November 15, 2026, group rates shall increase by eight percent (8%)</mark>.',bm:['Yours: +8% escalator','Market: none'],rl:'Strike the escalation clause, or extend it to Dec 15.'},
+   {sev:'med',type:'contract',t:'No renovation / construction clause',d:'Proposal Lens found a planned ballroom renovation in spring 2027. The contract gives you no protection.',ex:'<mark>[No renovation disclosure clause present]</mark>',bm:['Yours: missing','Market: standard'],rl:'Add a clause: Hotel discloses renovations; Group may cancel without penalty if function space is affected.'},
+   {sev:'med',type:'contract',t:'Mandatory $25/night resort fee',d:'$29K including tax over the program.',ex:'A <mark>daily resort fee of $25.00</mark> will be applied to each occupied room.',bm:['Yours: $25','Market: $0 for groups'],rl:'Waive the resort fee for group-block rooms.'},
+   {sev:'med',type:'contract',t:'Attrition 15% at full rate, no resale credit',d:'Tighter than market and more expensive when triggered.',bm:['Yours: 15% @100%','Market: 20% @80%'],rl:'Use 20% cumulative at 80% of rate, with resale credit.'},
+   {sev:'med',type:'contract',t:'Exclusive AV at ~20% premium',d:'+$9.6K vs. market.',bm:['Yours: exclusive','Market: outside allowed']},
+  ],
+  asks:[
+   {t:'Strike the 8% rate escalation clause',why:'Removes deadline pressure.',val:Math.round(990*269*0.08*1.174)},
+   {t:'Waive $25 resort fee',why:'',ch:{fee:0},at:0},
+   {t:'Add renovation protection clause',why:'Cancel without penalty if the ballroom is affected.',val:0,vtxt:'Risk'},
+   {t:'20% cumulative attrition at 80% with resale credit',why:'',ch:{attr:0.2,penaltyPct:0.8,resell:true},at:0.2,lbl:'protected in a 20% drop'},
+   {t:'F&B minimum to $140K',why:'',ch:{fnbMin:140000},at:0},
+  ]},
+ {id:'ohare',name:"O'Hare Summit Center",short:"O'Hare Summit",area:'Rosemont (airport)',color:'#65A30D',
+  file:'Cvent Supplier Network response',fmt:'CVENT',fcolor:'#0A6CFF',pages:'structured',received:'Oct 15',contact:'Greg Novak',
+  rate:219,fee:0,compRatio:40,rebate:5,fnbMin:130000,svc:0.22,meetingRental:0,meetingWaiver:0,avMult:1,avFee:0,avExclusive:false,wifi:0,transport:42000,
+  attr:0.20,attrBasis:'cumulative',penaltyPct:0.8,resell:true,rating:4.0,exp:50,
+  cancel:[[365,.10],[181,.30],[91,.60],[0,.85]],
+  log:['Importing Cvent Supplier Network response · structured','Extracted 39 terms · rate $219 · $5/room-night rebate','⚠ Requested dates unavailable: alternate offered May 19–21','⚠ Off-site dinner + downtown activities need shuttles (~$42K est.)'],
+  flags:[
+   {sev:'high',type:'fit',t:'Your dates aren\'t available. They offered May 19–21.',d:'One week later, which collides with your Q2 board meeting (May 20).',ex:'Requested dates are unavailable; we are pleased to offer <mark>alternate dates of May 19–21, 2027</mark>.',bm:['Requested: May 12–14','Offered: May 19–21']},
+   {sev:'med',type:'fit',t:'~$42K in shuttles not in the proposal',d:'35–45 min to downtown for the awards dinner and team outings.',bm:['Est. 8 coaches × 3 days']},
+   {sev:'low',type:'fit',t:'Guest rating 4.0, below your RFP bar (4.3)',d:'Airport property, low walkability.'},
+   {sev:'low',type:'contract',t:'Rate held 7 days only',d:'Shortest hold in the set.',bm:['Yours: 7 days','Market: 30 days']},
+   {sev:'good',type:'contract',t:'Clean, at-market contract terms',d:'20% cumulative attrition at 80%, resale credit, graduated cancellation.'},
+  ],
+  asks:[
+   {t:'10% rate reduction for accepting alternate dates',why:'Compensates for the date shift.',ch:{rate:197},at:0},
+   {t:'Hotel-provided downtown shuttles',why:'Removes the $42K hidden cost.',ch:{transport:0},at:0},
+   {t:'Extend rate hold to 30 days',why:'',val:0,vtxt:'Time'},
+  ]},
+];
+
+/* ===================== MODEL ===================== */
+const sum=a=>a.reduce((x,y)=>x+y,0);
+function calc(h,D=0){
+  const E=EVENT, tx=E.roomTax;
+  const pick=E.block.map((b,i)=>b*(1-Math.min(1,D*NIGHT_W[i])));
+  const pt=sum(pick);
+  const rooms=pt*h.rate*(1+tx), fees=pt*h.fee*(1+tx);
+  const comps=Math.floor(pt/h.compRatio)*h.rate*(1+tx), rebate=pt*h.rebate;
+  const fnbNeed=E.fnbNeed*(1-D), fnbBilled=Math.max(h.fnbMin,fnbNeed), mult=(1+h.svc)*(1+E.fnbTax);
+  const fnb=fnbBilled*mult;
+  const meeting=fnbBilled>=h.meetingWaiver?0:h.meetingRental;
+  const av=E.avBase*h.avMult+h.avFee;
+  const wifi=h.wifi*E.attendees*(1-D)*E.days;
+  const transport=h.transport;
+  let short=h.attrBasis==='cumulative'?Math.max(0,RN*(1-h.attr)-pt):sum(E.block.map((b,i)=>Math.max(0,b*(1-h.attr)-pick[i])));
+  let penalty=short*h.rate*h.penaltyPct; if(h.resell) penalty*=0.75;
+  const fnbWaste=(fnbBilled-fnbNeed)*mult;
+  const total=rooms+fees-comps-rebate+fnb+meeting+av+wifi+transport+penalty;
+  const quoted=RN*h.rate*(1+tx)+E.fnbNeed*(1+BENCH.svc)*(1+E.fnbTax)+E.avBase;
+  return {rooms,fees,comps,rebate,fnb,meeting,av,wifi,transport,penalty,fnbWaste,total,credits:comps+rebate,exposure:penalty+fnbWaste,quoted,hidden:total-quoted};
+}
+const $=s=>document.querySelector(s);
+const money=n=>(n<0?'−':'')+'$'+Math.round(Math.abs(n)).toLocaleString();
+const k=n=>(n<0?'−':'')+'$'+(Math.abs(n)>=1e6?(Math.abs(n)/1e6).toFixed(2)+'M':Math.abs(n)>=1e4?Math.round(Math.abs(n)/1000)+'K':(Math.abs(n)/1000).toFixed(1)+'K');
+const H=id=>HOTELS.find(h=>h.id===id);
+const SEVPTS={high:25,med:12,low:5,good:0};
+const riskPts=(h,type)=>Math.min(100,sum(h.flags.filter(f=>f.type===type).map(f=>SEVPTS[f.sev])));
+
+/* ===================== STATE / NAV ===================== */
+const STEPS=['Proposal inbox','True cost','Contract risk','Stress test','Recommend'];
+let state={step:0,analyzed:false,riskSel:'mer',drop:0,weights:{cost:35,risk:30,exp:15,fit:20},neg:null};
+function renderStepper(){
+  $('#stepper').innerHTML=STEPS.map((s,i)=>`<button class="step ${i===state.step?'active':''} ${state.analyzed&&i<state.step?'done':''}" ${!state.analyzed&&i>0?'disabled':''} data-step="${i}"><span class="n">${state.analyzed&&i<state.step?'✓':i+1}</span>${s}</button>`).join('')
+  + (state.analyzed&&state.step<4?`<button class="btn" style="margin-left:auto" id="nextBtn">Next: ${STEPS[state.step+1]} →</button>`:'');
+  document.querySelectorAll('.step').forEach(b=>b.onclick=()=>go(+b.dataset.step));
+  const nb=$('#nextBtn'); if(nb) nb.onclick=()=>go(state.step+1);
+}
+function go(i){
+  state.step=i;
+  document.querySelectorAll('section.view').forEach((v,j)=>v.classList.toggle('show',j===i));
+  renderStepper(); window.scrollTo({top:0,behavior:'smooth'});
+  [null,renderCompare,renderRisk,renderStress,renderRecommend][i]?.();
+}
+
+/* ===================== STEP 1 ===================== */
+function renderInbox(){
+  $('#inbox').innerHTML=HOTELS.map(h=>`
+   <div class="inbox-item">
+     <div class="ficon" style="background:${h.fcolor}">${h.fmt}</div>
+     <div class="meta">
+       <div class="fname">${h.file}</div>
+       <div class="muted" style="font-size:12.5px">${h.name} · ${h.area} · ${h.pages} · received ${h.received}</div>
+     </div>
+     <div class="claim"><div class="muted" style="font-size:11px">QUOTED RATE</div><b>$${h.rate}</b><span class="muted">/night</span></div>
+   </div>`).join('');
+  const naive=[...HOTELS].sort((a,b)=>a.rate-b.rate);
+  $('#naiveRank').innerHTML=naive.map((h,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="row" style="gap:8px"><b class="muted">${i+1}</b><i class="dot" style="background:${h.color}"></i>${h.short}</span><b>$${h.rate}</b></div>`).join('');
+}
+function runAnalysis(){
+  const log=$('#log'); log.innerHTML=''; $('#modal').classList.add('show');
+  const lines=[]; HOTELS.forEach((h,i)=>{h.log.forEach((l,j)=>lines.push({l,i,first:j===0}));lines.push({l:`✓ ${h.short} normalized · true cost ${k(calc(h).total)}`,i,done:true});});
+  lines.push({l:'Benchmarking 214 terms against 3,180 comparable Chicago contracts…',bench:true});
+  const hid=sum(HOTELS.map(h=>Math.max(0,calc(h).hidden)));
+  lines.push({l:`✦ Done. ${k(hid)} in costs not reflected in quoted rates. ${sum(HOTELS.map(h=>h.flags.filter(f=>f.sev!=="good").length))} issues flagged.`,final:true});
+  let n=0;
+  const tick=()=>{
+    if(n>=lines.length){setTimeout(()=>{$('#modal').classList.remove('show');state.analyzed=true;go(1);},900);return;}
+    const x=lines[n++]; const d=document.createElement('div');
+    d.className=x.l.startsWith('⚠')?'warn':x.done||x.final?'ok':x.first?'info':x.bench?'info':'dim';
+    if(x.final) d.style.fontWeight='700';
+    d.textContent=(x.first?'▸ ':'  ')+x.l; log.appendChild(d); log.scrollTop=log.scrollHeight;
+    $('#prog').style.width=(n/lines.length*100)+'%';
+    $('#modalCount').textContent=Math.min(5,(x.i??4)+(x.done?1:0))+' / 5';
+    setTimeout(tick,x.l.startsWith('⚠')?420:x.first?320:230);
+  };
+  tick();
+}
+
+/* ===================== STEP 2 ===================== */
+const COMP=[['rooms','Room rate + tax','#2563EB'],['fees','Destination/resort fees','#F59E0B'],['fnb','F&B (incl. service & tax)','#10B981'],['meeting','Meeting room rental','#8B5CF6'],['av','AV','#EC4899'],['other','Wi-Fi / transport','#64748B']];
+function renderCompare(){
+  const R=HOTELS.map(h=>({h,c:calc(h)}));
+  const byTotal=[...R].sort((a,b)=>a.c.total-b.c.total), byRate=[...R].sort((a,b)=>a.h.rate-b.h.rate);
+  const hidden=sum(R.map(r=>Math.max(0,r.c.hidden)));
+  const mer=R.find(r=>r.h.id==='mer'), lake=R.find(r=>r.h.id==='lake');
+  $('#kpis').innerHTML=`
+   <div class="card kpi"><div class="l">Costs not visible in quoted rates</div><div class="v" style="color:var(--red)">${k(hidden)}</div><div class="muted" style="font-size:12px">across 5 proposals: fees, minimums, exclusivity, transport</div></div>
+   <div class="card kpi"><div class="l">"2nd cheapest" Meridian is actually</div><div class="v">${k(mer.c.total-lake.c.total)} more</div><div class="muted" style="font-size:12px">than Lakeshore Grand, despite a $40/night lower rate</div></div>
+   <div class="card kpi"><div class="l">Analyst time saved</div><div class="v" style="color:var(--green)">~3 days</div><div class="muted" style="font-size:12px">5 proposals · 178 terms extracted in 40 seconds</div></div>`;
+  // rank flip
+  const rowH=54;
+  const col=(arr,val,side)=>`<div class="rankcol"><div class="muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">${side==='l'?'By quoted rate':'By true total cost'}</div>${arr.map((r,i)=>{const other=(side==='l'?byTotal:byRate).indexOf(r);const cls=side==='r'?(other<i?'hl-bad':other>i?'hl-good':''):'';return `<div class="ri ${cls}"><span class="num">${i+1}</span><i class="dot" style="background:${r.h.color}"></i><span class="nm">${r.h.short}</span><span class="val">${val(r)}</span></div>`}).join('')}</div>`;
+  let paths=''; byRate.forEach((r,i)=>{const j=byTotal.indexOf(r);const y1=30+i*rowH+23,y2=30+j*rowH+23;paths+=`<path d="M0 ${y1} C35 ${y1},35 ${y2},70 ${y2}" stroke="${j>i?'#DC2626':j<i?'#12A150':'#CBD5E1'}" stroke-width="${j!==i?2.5:1.5}" fill="none" opacity=".8"/>`;});
+  $('#rankflip').innerHTML=col(byRate,r=>'$'+r.h.rate,'l')+`<svg class="links" viewBox="0 0 70 ${30+5*rowH}" style="height:${30+5*rowH}px">${paths}</svg>`+col(byTotal,r=>k(r.c.total),'r');
+  // stacked
+  const max=Math.max(...R.map(r=>r.c.total+r.c.credits));
+  $('#stacked').innerHTML=byTotal.map(({h,c})=>{
+    const parts={rooms:c.rooms,fees:c.fees,fnb:c.fnb,meeting:c.meeting,av:c.av,other:c.wifi+c.transport};
+    return `<div class="sb-row"><div class="sb-name"><i class="dot" style="background:${h.color}"></i>${h.short}</div>
+     <div class="sb-track">${COMP.map(([key,lbl,col])=>`<i title="${lbl}: ${money(parts[key])}" data-w="${parts[key]/max*100}" style="width:0;background:${col}"></i>`).join('')}</div>
+     <div class="sb-total">${k(c.total)}${c.credits?`<small>incl. −${k(c.credits)} credits</small>`:''}</div></div>`}).join('');
+  $('#legend').innerHTML=COMP.map(([,l,c])=>`<span><i class="dot" style="background:${c}"></i>${l}</span>`).join('');
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.sb-track i').forEach(i=>i.style.width=i.dataset.w+'%'),50));
+  // terms table
+  const rows=[
+   ['Quoted room rate',h=>'$'+h.rate,h=>h.rate===Math.min(...HOTELS.map(x=>x.rate))?'good':'','—'],
+   ['Mandatory nightly fee',h=>h.fee?'$'+h.fee:'None',h=>h.fee?'bad':'good','$0'],
+   ['Effective nightly rate',h=>'$'+(h.rate+h.fee),h=>'', '—'],
+   ['F&B minimum vs. your $135K plan',h=>`${k(h.fnbMin)} (${h.fnbMin>=EVENT.fnbNeed?'+':''}${Math.round((h.fnbMin/EVENT.fnbNeed-1)*100)}%)`,h=>h.fnbMin/EVENT.fnbNeed-1>0.2?'bad':h.fnbMin/EVENT.fnbNeed-1>BENCH.fnbOver?'warn':'good','≤ +5%'],
+   ['Service charge',h=>Math.round(h.svc*100)+'%',h=>h.svc>BENCH.svc?'warn':'good','24%'],
+   ['Meeting room rental',h=>h.meetingRental&&calc(h).meeting?k(h.meetingRental):'Waived',h=>calc(h).meeting?'bad':'good','Waived'],
+   ['AV',h=>h.avExclusive?`Exclusive (+${Math.round((h.avMult-1)*100)}%)`:h.avFee?`Outside OK ($${(h.avFee/1000).toFixed(1)}K fee)`:'Outside OK',h=>h.avExclusive?'bad':'good','Outside OK'],
+   ['Comp rooms',h=>'1 per '+h.compRatio,h=>h.compRatio>BENCH.comp?'warn':'good','1 / 40'],
+   ['Attrition allowance',h=>`${Math.round(h.attr*100)}% ${h.attrBasis==='night'?'night-by-night':'cumulative'}`,h=>h.attrBasis==='night'?'bad':h.attr<BENCH.attr?'warn':'good','20% cumulative'],
+   ['Attrition damages',h=>`${Math.round(h.penaltyPct*100)}% of rate${h.resell?' · resale credit':''}`,h=>h.penaltyPct===1&&!h.resell?'bad':'good','80% + resale'],
+   ['Cancellation at 181–365 days',h=>Math.round(cancelPct(h,200)*100)+'%',h=>cancelPct(h,200)>.5?'bad':cancelPct(h,200)>.4?'warn':'good','30–40%'],
+   ['Guest rating',h=>h.rating.toFixed(1)+' ★',h=>h.rating<4.3?'warn':'good','≥ 4.3 (RFP)'],
+   ['True total cost',h=>k(calc(h).total),h=>{const t=calc(h).total, mn=Math.min(...R.map(r=>r.c.total)),mx=Math.max(...R.map(r=>r.c.total));return t===mn?'good':t===mx?'bad':''},'—'],
+  ];
+  $('#termsTbl').innerHTML=`<tr><th>Term</th>${HOTELS.map(h=>`<th><span class="row" style="gap:6px"><i class="dot" style="background:${h.color}"></i>${h.short}</span></th>`).join('')}<th>Benchmark</th></tr>`+
+   rows.map(([l,f,c,b])=>`<tr><td><b>${l}</b></td>${HOTELS.map(h=>`<td class="num ${c(h)}">${f(h)}</td>`).join('')}<td class="bench">${b}</td></tr>`).join('');
+}
+const cancelPct=(h,d)=>{for(const [t,p] of h.cancel) if(d>=t) return p; return 1;};
+
+/* ===================== STEP 3 ===================== */
+function gauge(score){
+  const c=score>=60?'#DC2626':score>=30?'#D97706':'#12A150', r=22, L=2*Math.PI*r;
+  return `<svg class="gauge" viewBox="0 0 52 52"><circle cx="26" cy="26" r="${r}" stroke="#EEF2F7" stroke-width="6" fill="none"/><circle cx="26" cy="26" r="${r}" stroke="${c}" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="${L*score/100} ${L}" transform="rotate(-90 26 26)"/><text x="26" y="30" text-anchor="middle" font-size="13" font-weight="800" fill="${c}">${score}</text></svg>`;
+}
+function renderRisk(){
+  const list=[...HOTELS].sort((a,b)=>(riskPts(b,'contract')+riskPts(b,'fit'))-(riskPts(a,'contract')+riskPts(a,'fit')));
+  $('#rlist').innerHTML=`<div class="muted" style="font-size:12px;margin-bottom:8px">Risk score (0 = clean, 100 = walk away)</div>`+list.map(h=>{
+    const s=Math.min(100,riskPts(h,'contract')+riskPts(h,'fit')); const n=h.flags.filter(f=>f.sev!=='good').length;
+    return `<button data-id="${h.id}" class="${state.riskSel===h.id?'on':''}">${gauge(s)}<div style="flex:1"><div style="font-weight:700">${h.short}</div><div class="muted" style="font-size:12px">${n} flag${n!==1?'s':''} · ${h.flags.filter(f=>f.sev==='high').length} high</div></div></button>`}).join('');
+  document.querySelectorAll('.rlist button').forEach(b=>b.onclick=()=>{state.riskSel=b.dataset.id;renderRisk();});
+  const h=H(state.riskSel), cr=riskPts(h,'contract'), fr=riskPts(h,'fit');
+  const sevTag={high:'<span class="tag red">High</span>',med:'<span class="tag amber">Medium</span>',low:'<span class="tag">Low</span>',good:'<span class="tag green">Strength</span>'};
+  $('#rdetail').innerHTML=`<div class="card">
+    <div class="row between" style="margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div><div style="font-size:18px;font-weight:800">${h.name}</div><div class="muted">${h.file}</div></div>
+      <div class="row"><span class="tag ${cr>=60?'red':cr>=30?'amber':'green'}">Contract risk ${cr}</span><span class="tag ${fr>=40?'red':fr>=15?'amber':'green'}">Program-fit risk ${fr}</span></div>
+    </div>
+    ${h.flags.map(f=>`<div class="flag sev-${f.sev}">
+      <div class="ft">${sevTag[f.sev]} ${f.type==='fit'?'<span class="tag blue">Fit</span>':''} ${f.t}</div>
+      <div class="muted" style="margin-top:4px">${f.d}</div>
+      ${f.bm?`<div class="bm">${f.bm.map((x,i)=>`<span>${i===0?'<b>'+x+'</b>':x}</span>`).join('')}</div>`:''}
+      ${f.ex?`<div class="ex">“${f.ex}”</div>`:''}
+      ${f.rl?`<div class="rl">✎ <b>Suggested redline:</b> ${f.rl}</div>`:''}
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ===================== STEP 4 ===================== */
+function renderStress(){
+  const D=state.drop/100;
+  $('#drop').value=state.drop; $('#dropVal').textContent='−'+state.drop+'%'; $('#dropVal2').textContent='−'+state.drop+'%';
+  const R=HOTELS.map(h=>({h,c:calc(h,D)})).sort((a,b)=>b.c.exposure-a.c.exposure);
+  const max=Math.max(...HOTELS.map(h=>calc(h,0.4).exposure));
+  $('#expBars').innerHTML=R.map(({h,c})=>`<div class="exp-row"><div class="row" style="gap:8px;font-weight:600"><i class="dot" style="background:${h.color}"></i>${h.short}</div><div class="exp-track"><i style="width:${c.penalty/max*100}%;background:#DC2626"></i><i style="width:${c.fnbWaste/max*100}%;background:#F59E0B"></i></div><div style="text-align:right;font-weight:700">${k(c.exposure)}</div></div>`).join('');
+  const worst=R[0], best=R[R.length-1];
+  $('#stressCallout').innerHTML=`At <b>−${state.drop}%</b> attendance, <b>${worst.h.short}</b> would bill you <b>${k(worst.c.exposure)}</b> for rooms and food nobody used, versus <b>${k(best.c.exposure)}</b> at ${best.h.short}.${worst.h.id==='mer'?' The night-by-night attrition clause is doing most of the damage.':''}`;
+  // line chart
+  const W=640,Ht=280,pl=56,pr=16,pt=14,pb=34, xs=d=>pl+(d/40)*(W-pl-pr), ys=v=>pt+(1-v/max)*(Ht-pt-pb);
+  let g=''; for(let v=0;v<=max;v+=50000){g+=`<line x1="${pl}" x2="${W-pr}" y1="${ys(v)}" y2="${ys(v)}" stroke="#EEF2F7"/><text x="${pl-8}" y="${ys(v)+4}" text-anchor="end" font-size="11" fill="#94A3B8">${k(v)}</text>`;}
+  for(let d=0;d<=40;d+=10) g+=`<text x="${xs(d)}" y="${Ht-12}" text-anchor="middle" font-size="11" fill="#94A3B8">−${d}%</text>`;
+  const lines=HOTELS.map(h=>{let p='';for(let d=0;d<=40;d++){const v=calc(h,d/100).exposure;p+=(d?'L':'M')+xs(d).toFixed(1)+' '+ys(v).toFixed(1);}const v=calc(h,D).exposure;return `<path d="${p}" stroke="${h.color}" stroke-width="${h.id==='mer'||h.id==='lake'?3:2}" fill="none" opacity="${h.id==='mer'||h.id==='lake'?1:.55}"/><circle cx="${xs(state.drop)}" cy="${ys(v)}" r="5" fill="#fff" stroke="${h.color}" stroke-width="2.5"/>`}).join('');
+  const labels=HOTELS.map(h=>({h,y:ys(calc(h,0.4).exposure)})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<labels.length;i++) if(labels[i].y-labels[i-1].y<13) labels[i].y=labels[i-1].y+13;
+  $('#lineChart').innerHTML=`<svg viewBox="0 0 ${W+110} ${Ht}" style="width:100%;height:auto">${g}<line x1="${xs(state.drop)}" x2="${xs(state.drop)}" y1="${pt}" y2="${Ht-pb}" stroke="#0A6CFF" stroke-dasharray="4 4"/>${lines}${labels.map(l=>`<text x="${W-pr+6}" y="${l.y+4}" font-size="11.5" font-weight="600" fill="${l.h.color}">${l.h.short}</text>`).join('')}</svg>`;
+  renderCancel();
+}
+function renderCancel(){
+  const d=+$('#cancelSel').value;
+  const rows=HOTELS.map(h=>{const base=RN*h.rate+h.fnbMin,p=cancelPct(h,d);return {h,p,v:base*p};}).sort((a,b)=>a.v-b.v);
+  $('#cancelTbl').innerHTML=`<tr><th>Hotel</th><th>Liability</th><th>You'd owe</th></tr>`+rows.map((r,i)=>`<tr><td><span class="row" style="gap:6px"><i class="dot" style="background:${r.h.color}"></i>${r.h.short}</span></td><td>${Math.round(r.p*100)}% of revenue</td><td class="num ${i===0?'good':i===rows.length-1?'bad':''}">${k(r.v)}</td></tr>`).join('');
+}
+
+/* ===================== STEP 5 ===================== */
+const DIMS=[['cost','Total cost','#0A6CFF'],['risk','Contract safety','#00A99D'],['exp','Attendee experience','#7C3AED'],['fit','Program fit','#F59E0B']];
+function scores(){
+  const T=HOTELS.map(h=>calc(h).total), mn=Math.min(...T), mx=Math.max(...T);
+  const w=state.weights, ws=sum(Object.values(w))||1;
+  return HOTELS.map((h,i)=>{
+    const sub={cost:100-80*(T[i]-mn)/(mx-mn),risk:100-riskPts(h,'contract'),exp:h.exp,fit:100-riskPts(h,'fit')};
+    const parts=Object.fromEntries(DIMS.map(([d])=>[d,sub[d]*w[d]/ws]));
+    return {h,sub,parts,score:sum(Object.values(parts))};
+  }).sort((a,b)=>b.score-a.score);
+}
+function renderRecommend(){
+  $('#weights').innerHTML=`<h3>What matters for this event?</h3>`+DIMS.map(([d,l,c])=>`<label><div class="wl"><span class="row" style="gap:6px"><i class="dot" style="background:${c}"></i>${l}</span><span>${state.weights[d]}</span></div><input type="range" min="0" max="100" value="${state.weights[d]}" data-w="${d}"></label>`).join('')+
+   `<div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sec" data-pre="cfo" style="padding:6px 10px;font-size:12px">CFO mode</button><button class="btn sec" data-pre="bal" style="padding:6px 10px;font-size:12px">Balanced</button><button class="btn sec" data-pre="exp" style="padding:6px 10px;font-size:12px">Attendee-first</button></div>`;
+  document.querySelectorAll('[data-w]').forEach(r=>r.oninput=()=>{state.weights[r.dataset.w]=+r.value;r.closest('label').querySelector('.wl span:last-child').textContent=r.value;renderScores();});
+  document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{state.weights={cfo:{cost:100,risk:10,exp:0,fit:0},bal:{cost:35,risk:30,exp:15,fit:20},exp:{cost:20,risk:20,exp:40,fit:20}}[b.dataset.pre];renderRecommend();});
+  renderScores();
+}
+function renderScores(){
+  const S=scores(), top=S[0], c=calc(top.h), second=S[1];
+  const reasons=[];
+  const cheapest=[...HOTELS].sort((a,b)=>calc(a).total-calc(b).total)[0];
+  if(cheapest.id===top.h.id) reasons.push(`lowest true cost (${k(c.total)})`); else reasons.push(`${k(c.total)} true cost, ${k(c.total-calc(cheapest).total)} more than ${cheapest.short} but without its ${cheapest.id==='ohare'?'date conflict and shuttle cost':'trade-offs'}`);
+  if(riskPts(top.h,'contract')<20) reasons.push('market-standard contract terms'); else reasons.push(`contract risk ${riskPts(top.h,'contract')}/100, so negotiate before signing`);
+  if(riskPts(top.h,'fit')===0) reasons.push('fits your dates, rooms and general session');
+  const inBudget=c.total<=600000;
+  $('#winner').innerHTML=`<div class="winner"><div style="font-size:12px;letter-spacing:.08em;color:#7FE3D8;font-weight:700">✦ PROPOSAL LENS RECOMMENDS</div><div class="big">${top.h.name}</div><div class="why">Score ${top.score.toFixed(0)} vs. ${second.score.toFixed(0)} for ${second.h.short}: ${reasons.join('; ')}. ${inBudget?`<b style="color:#7FE3D8">${k(600000-c.total)} under budget.</b>`:`<b style="color:#FCA5A5">${k(c.total-600000)} over budget.</b>`}</div></div>`;
+  $('#scores').innerHTML=S.map((s,i)=>`<div class="score-row"><b class="muted">${i+1}</b><span class="row" style="gap:8px;font-weight:600"><i class="dot" style="background:${s.h.color}"></i>${s.h.short}</span><div class="stack">${DIMS.map(([d,,col])=>`<i style="width:${s.parts[d]}%;background:${col}"></i>`).join('')}</div><b style="text-align:right">${s.score.toFixed(0)}</b></div>`).join('');
+  if(!state.neg||state.negAuto){state.neg=top.h.id;state.negAuto=true;}
+  $('#negHotel').innerHTML=HOTELS.map(h=>`<option value="${h.id}" ${h.id===state.neg?'selected':''}>${h.short}${h.id===top.h.id?' (recommended)':''}</option>`).join('');
+  renderAsks();
+}
+function askValue(h,a){
+  if(a.val!==undefined) return a.val;
+  const at=a.at||0; return calc(h,at).total-calc({...h,...a.ch},at).total;
+}
+function renderAsks(){
+  const h=H(state.neg);
+  $('#asks').innerHTML=h.asks.map((a,i)=>{const v=askValue(h,a);return `<label class="ask"><input type="checkbox" checked data-a="${i}"><div><div class="t">${a.t}</div><div class="muted" style="font-size:12.5px">${a.why||''}</div></div><div class="v">${v>0?k(v)+(a.lbl?`<div class="muted" style="font-size:11px;font-weight:500;text-align:right">${a.lbl}</div>`:''):`<span class="tag blue">${a.vtxt||'—'}</span>`}</div></label>`}).join('');
+  document.querySelectorAll('[data-a]').forEach(c=>c.onchange=updAskTotal);
+  updAskTotal();
+}
+function selectedAsks(){const h=H(state.neg);return [...document.querySelectorAll('[data-a]')].filter(c=>c.checked).map(c=>h.asks[+c.dataset.a]);}
+function updAskTotal(){const h=H(state.neg);$('#askTotal').textContent=k(sum(selectedAsks().map(a=>Math.max(0,askValue(h,a)))));}
+let typing=null;
+function draftEmail(){
+  const h=H(state.neg), asks=selectedAsks();
+  const first=h.contact.split(' ')[0];
+  const txt=`To: ${h.contact} <sales@${h.id}-hotel.example>
+Subject: Northwind Q2 SKO 2027: proposal response & requested adjustments
+
+Hi ${first},
+
+Thank you for the proposal for our Q2 Sales Kickoff (May 12–14, 2027; 990 room nights, 450 attendees). ${h.short} is on our final shortlist, and we'd like to move forward quickly.
+
+To get to signature, we'd need the following adjustments:
+
+${asks.map((a,i)=>`${i+1}. ${a.t}${a.why?`\n   ${a.why}`:''}`).join('\n\n')}
+
+These bring the agreement in line with comparable Chicago programs we've contracted this year. Could you send a revised proposal by Friday, Oct 30? If we can align on these points, we're prepared to sign before Nov 6.
+
+Thanks again for the partnership,
+
+Priya Shah
+Sr. Event Manager, Northwind Technologies`;
+  const el=$('#email'); clearInterval(typing); let i=0; el.textContent='';
+  const caret=document.createElement('span');caret.className='caret';
+  typing=setInterval(()=>{i+=4;el.textContent=txt.slice(0,i);el.appendChild(caret);el.scrollTop=el.scrollHeight;if(i>=txt.length){clearInterval(typing);el.textContent=txt;}},12);
+  el.dataset.full=txt;
+}
+
+/* ===================== WIRING ===================== */
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+$('#analyzeBtn').onclick=runAnalysis;
+$('#drop').oninput=e=>{state.drop=+e.target.value;renderStress();};
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state.drop=+b.dataset.preset;renderStress();});
+$('#cancelSel').onchange=renderCancel;
+$('#negHotel').onchange=e=>{state.neg=e.target.value;state.negAuto=false;renderAsks();$('#email').innerHTML='<span class="muted">Pick your asks, then click “Draft counter-proposal”.</span>';};
+$('#draftBtn').onclick=draftEmail;
+$('#copyBtn').onclick=()=>{const t=$('#email').dataset.full;if(!t)return toast('Draft an email first');navigator.clipboard?.writeText(t).then(()=>toast('Copied to clipboard'),()=>toast('Copy not permitted here'));};
+const openDrawer=v=>{$('#drawer').classList.toggle('show',v);$('#drawerBg').classList.toggle('show',v);};
+$('#whyBtn').onclick=()=>openDrawer(true);$('#closeDrawer').onclick=()=>openDrawer(false);$('#drawerBg').onclick=()=>openDrawer(false);
+$('#resetBtn').onclick=()=>{state={step:0,analyzed:false,riskSel:'mer',drop:0,weights:{cost:35,risk:30,exp:15,fit:20},neg:null};$('#email').innerHTML='<span class="muted">Pick your asks, then click “Draft counter-proposal”.</span>';go(0);};
+renderInbox(); renderStepper();
+// Deep links (#cost, #risk, #stress, #recommend) jump past the analysis animation
+const HASH_STEPS={cost:1,risk:2,stress:3,recommend:4};
+if(HASH_STEPS[location.hash.slice(1)]){state.analyzed=true;go(HASH_STEPS[location.hash.slice(1)]);}
+</script>
+</body>
+</html>
